@@ -1,0 +1,115 @@
+#PM0-Sim
+
+This program implements a virtual machine (VM) known as the P-machine (PM/0). The P-machine is a stack machine with two memory stores: the “stack,” which is organized as a stack and contains the data to be used by the PM/0 CPU, and the “code,” which is organized as a list and contains the instructions for the VM. The PM/0 CPU has four registers to handle the stack and code segments: The registers are named base pointer (BP), stack pointer (SP), program counter (PC) and instruction register (IR). The machine also has a register file (RF) with sixteen (16) registers (0-15).
+
+The Instruction Set Architecture (ISA) of the PM/0 has 24 instructions and the instruction format is as follows: “OP R L M”
+Each instruction contains four components (OP R L M) that are separated by one space.
+
+OP is the operation code.
+R refers to a register
+L indicates the lexicographical level or a register in arithmetic and logic
+instructions.
+M depending of the operators it indicates:
+	- A number (instructions: LIT, INC).
+	- A program address (instructions: JMP, JPC, CAL). - A data address (instructions: LOD, STO)
+	- A register in arithmetic and logic instructions. (e.g. ADD R[1], R[2], R[3] )
+
+----------------------------------------------------------------------------
+
+Input Example: 
+
+Factorial Program: 
+6 0 0 6
+1 0 0 3
+4 0 0 4
+1 0 0 1 
+4 0 0 5 
+5 0 0 7 
+7 0 0 19 
+6 0 0 4  
+3 0 1 4 
+3 1 1 5 
+13 1 0 1 
+4 1 1 5 
+1 1 0 1 
+12 0 0 1 
+4 0 1 4 
+18 0 0 1 
+8 0 0 18 
+5 0 1 7 
+2 0 0 0 
+3 0 0 5 
+9 0 0 1 
+9 0 0 3
+
+Output: 
+
+
+ OP   Rg Lx Vl[ PC BP SP]
+INC   0  0  6[  1  1  6]   0   0   0   0   0   0 
+	Registers:[  0  0  0  0  0  0  0  0]
+LIT   0  0  3[  2  1  6]   0   0   0   0   0   0 
+	Registers:[  3  0  0  0  0  0  0  0]
+STO   0  0  4[  3  1  6]   0   0   0   3   0   0 
+	Registers:[  3  0  0  0  0  0  0  0]
+LIT   0  0  1[  4  1  6]   0   0   0   3   0   0 
+	Registers:[  1  0  0  0  0  0  0  0]
+STO   0  0  5[  5  1  6]   0   0   0   3   1   0 
+	Registers:[  1  0  0  0  0  0  0  0]
+CAL   0  0  7[  7  7 10]   0   0   0   3   1   0 |  0   1   1   6 
+	Registers:[  1  0  0  0  0  0  0  0]
+INC   0  0  4[  8  7 14]   0   0   0   3   1   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  1  0  0  0  0  0  0  0]
+LOD   0  1  4[  9  7 14]   0   0   0   3   1   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  3  0  0  0  0  0  0  0]
+LOD   1  1  5[ 10  7 14]   0   0   0   3   1   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  3  1  0  0  0  0  0  0]
+MUL   1  0  1[ 11  7 14]   0   0   0   3   1   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  3  3  0  0  0  0  0  0]
+STO   1  1  5[ 12  7 14]   0   0   0   3   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  3  3  0  0  0  0  0  0]
+LIT   1  0  1[ 13  7 14]   0   0   0   3   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  3  1  0  0  0  0  0  0]
+SUB   0  0  1[ 14  7 14]   0   0   0   3   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  2  1  0  0  0  0  0  0]
+STO   0  1  4[ 15  7 14]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  2  1  0  0  0  0  0  0]
+NEQ   0  0  1[ 16  7 14]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  1  1  0  0  0  0  0  0]
+JPC   0  0 18[ 17  7 14]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  1  1  0  0  0  0  0  0]
+CAL   0  1  7[  7 15 18]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18 
+	Registers:[  1  1  0  0  0  0  0  0]
+INC   0  0  4[  8 15 22]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  1  1  0  0  0  0  0  0]
+LOD   0  1  4[  9 15 22]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  2  1  0  0  0  0  0  0]
+LOD   1  1  5[ 10 15 22]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  2  3  0  0  0  0  0  0]
+MUL   1  0  1[ 11 15 22]   0   0   0   2   3   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  2  6  0  0  0  0  0  0]
+STO   1  1  5[ 12 15 22]   0   0   0   2   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  2  6  0  0  0  0  0  0]
+LIT   1  0  1[ 13 15 22]   0   0   0   2   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  2  1  0  0  0  0  0  0]
+SUB   0  0  1[ 14 15 22]   0   0   0   2   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  1  1  0  0  0  0  0  0]
+STO   0  1  4[ 15 15 22]   0   0   0   1   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  1  1  0  0  0  0  0  0]
+NEQ   0  0  1[ 16 15 22]   0   0   0   1   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  0  1  0  0  0  0  0  0]
+JPC   0  0 18[ 18 15 22]   0   0   0   1   6   0 |  0   1   1   6   0   0   0   0 |  0   1   7  18   0   0   0   0 
+	Registers:[  0  1  0  0  0  0  0  0]
+RTN   0  0  0[ 18  7 14]   0   0   0   1   6   0 |  0   1   1   6   0   0   0   0 
+	Registers:[  0  1  0  0  0  0  0  0]
+RTN   0  0  0[  6  1  6]   0   0   0   1   6   0 
+	Registers:[  0  1  0  0  0  0  0  0]
+JMP   0  0 19[ 19  1  6]   0   0   0   1   6   0 
+	Registers:[  0  1  0  0  0  0  0  0]
+LOD   0  0  5[ 20  1  6]   0   0   0   1   6   0 
+	Registers:[  6  1  0  0  0  0  0  0]
+6
+SIO   0  0  1[ 21  1  6]   0   0   0   1   6   0 
+	Registers:[  6  1  0  0  0  0  0  0]
+SIO   0  0  3[ 22  1  6]   0   0   0   1   6   0 
+	Registers:[  6  1  0  0  0  0  0  0]
